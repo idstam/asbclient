@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -40,6 +41,7 @@ type Client interface {
 	Send(path string, item *Message) error
 	SetSubscription(subscription string)
 	Unlock(item *Message) error
+	ListQueues() (*QueueFeed, error)
 }
 
 //client is the default implementation of Client
@@ -232,6 +234,36 @@ func (c *client) PeekLockMessage(path string, timeout int) (*Message, error) {
 	message.Body = mBody
 
 	return &message, nil
+}
+
+func (c *client) ListQueues() (*QueueFeed, error) {
+	url := c.url + "$Resources/Queues"
+	//fmt.Println(url)
+	req, err := c.request(url, "GET")
+
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, readError(resp)
+	}
+
+	defer resp.Body.Close()
+	mBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading message body")
+	}
+	var feed QueueFeed
+	err = xml.Unmarshal(mBody, &feed)
+
+	fmt.Println(feed.Entry[0].Content.QueueDescription.Status)
+	return &feed, err
 }
 
 //signatureExpiry returns the expiry for the shared access signature for the next request.
