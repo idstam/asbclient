@@ -17,7 +17,7 @@ type Message struct {
 	PartitionKey           string
 	SequenceNumber         int
 	State                  string
-	TimeToLive             int
+	TimeToLive             float64
 
 	Location string
 
