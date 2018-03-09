@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/michaelbironneau/asbclient"
+	"github.com/idstam/asbclient"
 )
 
-func main() {
+func main2() {
 	log.Printf("Starting")
 
 	client := asbclient.New(asbclient.Queue, os.Getenv("sb_namespace"), os.Getenv("sb_key_name"), os.Getenv("sb_key_value"))
